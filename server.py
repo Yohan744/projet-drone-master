@@ -27,6 +27,7 @@ class Server:
             print(f"{name} connected")
         else:
             print(f"{action}: {message['message']}")
+            print("")
             self.handleMessage(message)
 
     def client_left(self, client, server):
@@ -36,13 +37,12 @@ class Server:
 
     def handleMessage(self, message):
         if message["step_id"] == 4:
-            self.send_message_to("microphone", self.messageManager.create_message(4, "microphone", message["message"]))
+            self.send_message_to("web", self.messageManager.create_message(4, "microphone", message["message"]))
 
     def send_message_to(self, client_name, message):
         for client_id, client_info in self.clients.items():
             if client_info["name"] == client_name:
                 self.server.send_message(self.clients[client_id], message)
-                print(message)
                 break
         else:
             print(f"Client '{client_name}' not found")
