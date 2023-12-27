@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+import time
 
 
 class MessageManager:
@@ -8,7 +8,7 @@ class MessageManager:
 
     def create_message(self, step_id, action, message):
         self.messageId += 1
-        timestamp = datetime.utcnow().isoformat() + "Z"
+        timestamp = time.time()
 
         messageToSend = {
             "step_id": step_id,

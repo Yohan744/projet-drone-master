@@ -15,7 +15,7 @@ class Server:
         self.clients = {}
 
     def new_client(self, client, server):
-        self.clients[client['id']] = {"address": client['address'], "name": None}
+        self.clients[client['id']] = {"address": client['address'], "handler": client["handler"], "name": None}
 
     def message_received(self, client, server, messageReceived):
         message = self.messageManager.get_message(messageReceived)
@@ -27,11 +27,25 @@ class Server:
             print(f"{name} connected")
         else:
             print(f"{action}: {message['message']}")
+            self.handleMessage(message)
 
     def client_left(self, client, server):
         client_name = self.clients[client['id']]['name']
         print(f"{client_name} Disconnected")
         del self.clients[client['id']]
+
+    def handleMessage(self, message):
+        if message["step_id"] == 4:
+            self.send_message_to("microphone", self.messageManager.create_message(4, "microphone", message["message"]))
+
+    def send_message_to(self, client_name, message):
+        for client_id, client_info in self.clients.items():
+            if client_info["name"] == client_name:
+                self.server.send_message(self.clients[client_id], message)
+                print(message)
+                break
+        else:
+            print(f"Client '{client_name}' not found")
 
 
 server = Server()
