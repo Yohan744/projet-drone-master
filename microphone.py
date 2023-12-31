@@ -16,10 +16,8 @@ GPIO.setup(pin_manager.get_pin("microphone"), GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 def callback(channel):
-    if GPIO.input(channel):
-        ws.send(messageManager.create_message(4, "microphone", "off"))
-    else:
-        ws.send(messageManager.create_message(4, "microphone", "on"))
+    state = GPIO.input(channel)
+    ws.send(messageManager.create_message(4, "microphone", f"{'off' if state else 'on'}"))
 
 
 GPIO.add_event_detect(pin_manager.get_pin("microphone"), GPIO.BOTH, callback=callback, bouncetime=100)
