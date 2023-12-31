@@ -18,8 +18,10 @@ class Server:
         self.clients[client['id']] = {"address": client['address'], "handler": client["handler"], "name": None}
 
     def message_received(self, client, server, messageReceived):
+        action = None
         message = self.messageManager.get_message(messageReceived)
-        action = message["action"]
+        if message["action"]:
+            action = message["action"]
 
         if action == "setName":
             name = message["message"]
