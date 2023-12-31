@@ -22,6 +22,9 @@ def callback(channel):
 
 GPIO.add_event_detect(pin_manager.get_pin("microphone"), GPIO.BOTH, callback=callback, bouncetime=100)
 
-while True:
-    time.sleep(0.1)
-    pass
+try:
+    while True:
+        time.sleep(0.1)
+except KeyboardInterrupt:
+    GPIO.cleanup()
+    ws.close()

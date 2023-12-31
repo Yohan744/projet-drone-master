@@ -38,6 +38,13 @@ class Server:
         del self.clients[client['id']]
 
     def handleMessage(self, message):
+
+        if message["step_id"] == 1:
+            if message["action"] == "joystick_button":
+                print("smell")
+            else:
+                self.send_message_to("ipad", self.messageManager.create_message(1, message["action"], message["message"]))
+
         if message["step_id"] == 4:
             self.send_message_to("web", self.messageManager.create_message(4, "microphone", message["message"]))
 

@@ -16,24 +16,24 @@ x_pin = pin_manager.get_pin("joystick_x")
 y_pin = pin_manager.get_pin("joystick_y")
 button_pin = pin_manager.get_pin("joystick_button")
 
-GPIO.setup(x_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(y_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(x_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(y_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 def x_callback(channel):
     state = GPIO.input(channel)
-    ws.send(messageManager.create_message(1, "joystick", f"X {'on' if state else 'off'}"))
+    ws.send(messageManager.create_message(1, "joystick_X", f"{'0' if state else '-1'}"))
 
 
 def y_callback(channel):
     state = GPIO.input(channel)
-    ws.send(messageManager.create_message(1, "joystick", f"Y {'on' if state else 'off'}"))
+    ws.send(messageManager.create_message(1, "joystick_Y", f"Y {'0' if state else '-1'}"))
 
 
 def button_callback(channel):
     state = GPIO.input(channel)
-    ws.send(messageManager.create_message(1, "joystick_button", "pressed" if state else "released"))
+    ws.send(messageManager.create_message(1, "joystick_button", "off" if state else "on"))
 
 
 GPIO.add_event_detect(x_pin, GPIO.BOTH, callback=x_callback, bouncetime=100)
