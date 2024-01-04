@@ -28,6 +28,7 @@ def x_callback(channel):
 
 def y_callback(channel):
     state = GPIO.input(channel)
+
     ws.send(messageManager.create_message(1, "joystick_Y", f"{'0' if state else '-1'}"))
 
 

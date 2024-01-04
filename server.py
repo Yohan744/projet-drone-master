@@ -45,6 +45,9 @@ class Server:
             else:
                 self.send_message_to("ipad", self.messageManager.create_message(1, message["action"], message["message"]))
 
+        if message["step_id"] == 3:
+            self.send_message_to("rover", self.messageManager.create_message(3, "rotator", message["message"]))
+
         if message["step_id"] == 4:
             self.send_message_to("web", self.messageManager.create_message(4, "microphone", message["message"]))
 
@@ -54,7 +57,8 @@ class Server:
                 self.server.send_message(self.clients[client_id], message)
                 break
         else:
-            print(f"Client '{client_name}' not found")
+            pass
+            #print(f"Client '{client_name}' not found")
 
 
 server = Server()
