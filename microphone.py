@@ -20,7 +20,7 @@ def callback(channel):
     ws.send(messageManager.create_message(4, "microphone", f"{'off' if state else 'on'}"))
 
 
-GPIO.add_event_detect(pin_manager.get_pin("microphone"), GPIO.BOTH, callback=callback, bouncetime=100)
+GPIO.add_event_detect(pin_manager.get_pin("microphone"), GPIO.BOTH, callback=callback, bouncetime=1)
 
 try:
     while True:

@@ -15,7 +15,6 @@ CLK = pin_manager.get_pin("rotator_clk")
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(CLK, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-counter = 0
 clkLastState = GPIO.input(CLK)
 
 try:
@@ -23,8 +22,6 @@ try:
         clkState = GPIO.input(CLK)
 
         if clkState != clkLastState:
-            counter += 1
-            print("Rotator: " + str(counter))
             ws.send(messageManager.create_message(3, "rotator", "turning"))
         clkLastState = clkState
 
