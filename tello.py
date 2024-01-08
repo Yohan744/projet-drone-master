@@ -17,6 +17,7 @@ class TelloController:
             print("Taking off")
             self.tello.takeoff()
             self.is_flying = True
+            self.tello.flip_back()
 
     def stop(self):
         print("Landing")
