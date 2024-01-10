@@ -9,10 +9,12 @@ pin_manager = PinManager()
 
 # Connexions WebSocket
 ws = create_connection("ws://localhost:8080")
-ws.send(messageManager.create_message(0, "setName", "rotator"))
+if ws.connected:
+    ws.send(messageManager.create_message(0, "setName", "rotator"))
 
-# ws_rover = create_connection("ws://172.20.10.4:8080")
-# ws_rover.send(messageManager.create_message(0, "setName", "rotator"))
+ws_rover = create_connection("ws://172.20.10.4:8080")
+if ws_rover.connected:
+    ws_rover.send(messageManager.create_message(0, "setName", "rotator"))
 
 # Pins du rotocodeur
 CLK = pin_manager.get_pin("rotator_clk")
@@ -24,7 +26,7 @@ GPIO.setup(DT, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 clkLastState = GPIO.input(CLK)
 
-counter = 6
+counter = 19
 
 try:
     while True:
@@ -34,9 +36,14 @@ try:
         if clkState != clkLastState:
             if clkState == dtState:
                 counter += 1
-                if counter >= 7:
-                    ws.send(messageManager.create_message(3, "rotator", "turning"))
-                    # ws_rover.send(messageManager.create_message(3, "rotator", "turning"))
+                if counter >= 20:
+
+                    if ws.connected:
+                        ws.send(messageManager.create_message(3, "rotator", "turning"))
+
+                    if ws_rover.connected:
+                        ws_rover.send(messageManager.create_message(3, "rotator", "turning"))
+
                     counter = 0
             clkLastState = clkState
 

@@ -10,5 +10,9 @@ python3 microphone.py &
 sleep 1
 python3 rotator.py &
 sleep 1
+# python3 motor.py &
+sleep 1
+python3 temperature.py &
+sleep 1
 python3 joystick.py
 cd /

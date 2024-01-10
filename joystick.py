@@ -9,11 +9,14 @@ messageManager = MessageManager()
 pin_manager = PinManager()
 
 ws = create_connection("ws://localhost:8080")
-ws.send(messageManager.create_message(0, "setName", "joystick"))
+if ws.connected:
+    ws.send(messageManager.create_message(0, "setName", "joystick"))
 
 spi = spidev.SpiDev()
 spi.open(0, 0)
 spi.max_speed_hz = 1000000
+
+smell = False
 
 GPIO.setmode(GPIO.BOARD)
 button_pin = pin_manager.get_pin("joystick_button")
@@ -21,8 +24,12 @@ GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 def button_callback(channel):
+    global smell
     state = GPIO.input(channel)
-    ws.send(messageManager.create_message(1, "joystick_button", "off" if state else "on"))
+    if state and smell == False:
+        if ws.connected:
+            ws.send(messageManager.create_message(1, "joystick_button", "smell"))
+        smell = True
 
 
 GPIO.add_event_detect(button_pin, GPIO.BOTH, callback=button_callback, bouncetime=100)
@@ -67,10 +74,12 @@ def handle_deadzone(value, axis, zero_sent, invert=False):
 
     if abs(value) < DEADZONE:
         if not zero_sent:
-            ws.send(messageManager.create_message(1, f"joystick_{axis}", "0"))
+            if ws.connected:
+                ws.send(messageManager.create_message(1, f"joystick_{axis}", "0"))
             return True
     else:
-        ws.send(messageManager.create_message(1, f"joystick_{axis}", str(value)))
+        if ws.connected:
+            ws.send(messageManager.create_message(1, f"joystick_{axis}", str(value)))
         return False
     return zero_sent
 
@@ -86,7 +95,7 @@ try:
         x_zero_sent = handle_deadzone(x_value, "X", x_zero_sent)
         y_zero_sent = handle_deadzone(y_value, "Y", y_zero_sent, invert=True)
 
-        time.sleep(0.15)
+        time.sleep(0.2)
 
 except KeyboardInterrupt:
     spi.close()

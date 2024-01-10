@@ -26,6 +26,7 @@ class Server:
         if action == "setName":
             name = message["message"]
             self.clients[client['id']]["name"] = name
+            self.send_message_to(name, self.messageManager.create_message(0, "callback", "connected"))
             print(f"{name} connected")
         else:
             print(f"{action}: {message['message']}")
