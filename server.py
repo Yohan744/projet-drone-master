@@ -13,6 +13,7 @@ class Server:
         self.server.set_fn_client_left(self.client_left)
         self.messageManager = MessageManager()
         self.clients = {}
+        self.basicHumidity = None
 
     def new_client(self, client, server):
         self.clients[client['id']] = {"address": client['address'], "handler": client["handler"], "name": None}
@@ -42,12 +43,26 @@ class Server:
 
         if message["step_id"] == 1:
             if message["action"] == "joystick_button":
-                print("smell")
+                self.send_message_to("spray", self.messageManager.create_message(1, "activateSpray", ""))
             else:
                 self.send_message_to("ipad", self.messageManager.create_message(1, message["action"], message["message"]))
 
         if message["step_id"] == 3:
-            self.send_message_to("rover", self.messageManager.create_message(3, "rotator", message["message"]))
+
+            if message["action"] == "startRotator":
+                self.send_message_to("rotator", self.messageManager.create_message(3, "launchRotator", ""))
+            if message["action"] == "rotator":
+                self.send_message_to("rover", self.messageManager.create_message(3, "rotator", message["message"]))
+
+            if message["action"] == "startHumidity":
+                self.send_message_to("temperature", self.messageManager.create_message(3, "launchHumidity", ""))
+            if message["action"] == "humidity":
+                if self.basicHumidity is None:
+                    self.basicHumidity = message["message"]
+
+                if message["message"] > self.basicHumidity + 20:
+                    print("Humidity reached nice level")
+                    print("----------------------")
 
         if message["step_id"] == 4:
             self.send_message_to("web", self.messageManager.create_message(4, "microphone", message["message"]))
