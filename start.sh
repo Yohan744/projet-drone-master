@@ -14,5 +14,7 @@ python3 spray.py &
 sleep 1
 python3 temperature.py &
 sleep 1
+python3 lights.py &
+sleep 1
 python3 joystick.py
 cd /
