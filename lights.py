@@ -25,7 +25,7 @@ headers = {
 def setupBasicScene():
 
     sceneData = {
-        "scene": "9Y0xFmgEvVB76a25"
+        "scene": os.getenv('SCENE_ID')
     }
 
     response = requests.put(url, json=sceneData, headers=headers)
@@ -36,7 +36,7 @@ def control_lights(xy, transitiontime):
     data = {
         "on": True,
         "xy": xy,
-        "bri": 100,
+        "bri": 254,
         "transitiontime": transitiontime
     }
 
@@ -51,8 +51,8 @@ try:
             mess = ws.recv()
             if mess:
                 message = messageManager.get_message(mess)
-                if message["action"] == "turnOn":
-                    control_lights([0.720000, 0.250000], 50)
+                if message["action"] == "start":
+                    control_lights([0.15, 0.15], 50)
 
         except KeyboardInterrupt:
             break

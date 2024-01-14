@@ -56,6 +56,7 @@ class Server:
 
             if message["action"] == "startHumidity":
                 self.send_message_to("temperature", self.messageManager.create_message(3, "launchHumidity", ""))
+                self.send_message_to("lights", self.messageManager.create_message(3, "start", ""))
             if message["action"] == "humidity":
                 if self.basicHumidity is None:
                     self.basicHumidity = message["message"]

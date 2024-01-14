@@ -42,7 +42,7 @@ try:
                 counter += 1
                 if counter >= 20 and isActivate is True:
 
-                    if ws.connected:
+                    if ws is not None and ws.connected:
                         ws.send(messageManager.create_message(3, "rotator", "turning"))
 
                     if ws_rover is not None and ws_rover.connected:
