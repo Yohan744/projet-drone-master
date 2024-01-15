@@ -14,6 +14,8 @@ class Server:
         self.messageManager = MessageManager()
         self.clients = {}
         self.basicHumidity = None
+        self.lastHumidity = None
+        self.updatedLightsCount = 0
 
     def new_client(self, client, server):
         self.clients[client['id']] = {"address": client['address'], "handler": client["handler"], "name": None}
@@ -60,10 +62,12 @@ class Server:
             if message["action"] == "humidity":
                 if self.basicHumidity is None:
                     self.basicHumidity = message["message"]
+                    self.lastHumidity = message["message"]
 
-                if message["message"] > self.basicHumidity + 20:
-                    print("Humidity reached nice level")
-                    print("----------------------")
+                if self.basicHumidity is not None and message["message"] > self.lastHumidity and self.updatedLightsCount < 10:
+                    self.lastHumidity = message["message"]
+                    self.updatedLightsCount += 1
+                    self.send_message_to("lights", self.messageManager.create_message(3, "update", ""))
 
         if message["step_id"] == 4:
             self.send_message_to("web", self.messageManager.create_message(4, "microphone", message["message"]))

@@ -1,4 +1,4 @@
-from websocket import create_connection
+from websocket import create_connection, WebSocketException
 import time
 import board
 import adafruit_dht
@@ -47,6 +47,8 @@ while True:
     except RuntimeError as error:
         pass
     except Exception as e:
+        pass
+    except WebSocketException as e:
         pass
     except KeyboardInterrupt:
         ws.close()

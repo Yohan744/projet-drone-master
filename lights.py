@@ -7,6 +7,22 @@ from messageManager import MessageManager
 load_dotenv()
 messageManager = MessageManager()
 
+currentLightIndex = 0
+lightTab = [
+    [0.15, 0.15],
+    [0.1911, 0.1754],
+    [0.2323, 0.2008],
+    [0.2734, 0.2262],
+    [0.3146, 0.2516],
+    [0.3557, 0.2771],
+    [0.3968, 0.3025],
+    [0.4380, 0.3279],
+    [0.4791, 0.3533],
+    [0.5203, 0.3787],
+    [0.5614, 0.4041],
+    [0.5614, 0.4041]
+]
+
 ws = create_connection("ws://localhost:8080")
 if ws.connected:
     ws.send(messageManager.create_message(0, "setName", "lights"))
@@ -28,7 +44,7 @@ def setupBasicScene():
         "scene": os.getenv('SCENE_ID')
     }
 
-    response = requests.put(url, json=sceneData, headers=headers)
+    # response = requests.put(url, json=sceneData, headers=headers)
 
 
 def control_lights(xy, transitiontime):
@@ -40,7 +56,8 @@ def control_lights(xy, transitiontime):
         "transitiontime": transitiontime
     }
 
-    response = requests.put(url, json=data, headers=headers)
+    # response = requests.put(url, json=data, headers=headers)
+    print("switch light")
 
 
 setupBasicScene()
@@ -51,8 +68,14 @@ try:
             mess = ws.recv()
             if mess:
                 message = messageManager.get_message(mess)
+
                 if message["action"] == "start":
                     control_lights([0.15, 0.15], 50)
+
+                if message["action"] == "update":
+                    if currentLightIndex < len(lightTab):
+                        currentLightIndex += 1
+                        control_lights(lightTab[currentLightIndex], 10)
 
         except KeyboardInterrupt:
             break
