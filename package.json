@@ -1,0 +1,16 @@
+{
+  "name": "puck",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "dev": ""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@abandonware/noble": "^1.9.2-23",
+    "ws": "^8.16.0"
+  }
+}
