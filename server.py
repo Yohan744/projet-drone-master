@@ -13,8 +13,6 @@ class Server:
         self.server.set_fn_client_left(self.client_left)
         self.messageManager = MessageManager()
         self.clients = {}
-        self.basicHumidity = None
-        self.lastHumidity = None
         self.updatedLightsCount = 0
 
     def new_client(self, client, server):
@@ -23,7 +21,7 @@ class Server:
     def message_received(self, client, server, messageReceived):
         action = None
         message = self.messageManager.get_message(messageReceived)
-        if message["action"]:
+        if message["action"] and message is not None:
             action = message["action"]
 
         if action == "setName":
@@ -60,17 +58,16 @@ class Server:
                 self.send_message_to("temperature", self.messageManager.create_message(3, "launchHumidity", ""))
                 self.send_message_to("lights", self.messageManager.create_message(3, "start", ""))
             if message["action"] == "humidity":
-                if self.basicHumidity is None:
-                    self.basicHumidity = message["message"]
-                    self.lastHumidity = message["message"]
-
-                if self.basicHumidity is not None and message["message"] > self.lastHumidity and self.updatedLightsCount < 10:
-                    self.lastHumidity = message["message"]
+                if message["message"] is not None and self.updatedLightsCount < 10:
                     self.updatedLightsCount += 1
                     self.send_message_to("lights", self.messageManager.create_message(3, "update", ""))
 
         if message["step_id"] == 4:
-            self.send_message_to("web", self.messageManager.create_message(4, "microphone", message["message"]))
+            if message["action"] == "microphone":
+                self.send_message_to("web", self.messageManager.create_message(4, "microphone", message["message"]))
+
+            if message["action"] == "remote":
+                self.send_message_to("web", self.messageManager.create_message(4, "remote", message["message"]))
 
     def send_message_to(self, client_name, message):
         for client_id, client_info in self.clients.items():
@@ -79,7 +76,7 @@ class Server:
                 break
         else:
             pass
-            #print(f"Client '{client_name}' not found")
+            print(f"Client '{client_name}' not found")
 
 
 server = Server()

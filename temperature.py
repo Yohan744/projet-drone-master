@@ -9,6 +9,9 @@ messageManager = MessageManager()
 pin_manager = PinManager()
 
 isActivate = False
+lightCount = 0
+basicHumidity = None
+isTempDone = False
 
 ws = create_connection("ws://localhost:8080")
 if ws.connected:
@@ -20,21 +23,32 @@ dht_right = adafruit_dht.DHT11(board.D27)
 while True:
     try:
 
-        if isActivate is True:
+        if isActivate is True and dht_left.humidity is not None and dht_right.humidity is not None:
             h_left = dht_left.humidity
             h_right = dht_right.humidity
-            temp = dht_right.temperature
 
-            if h_left is not None and h_right is not None and isinstance(h_left, int) and isinstance(h_right, int):
+            if h_left is not None and h_right is not None and isinstance(h_left, int) and isinstance(h_right,int) and isTempDone is False:
+
                 moy = (h_left + h_right) / 2
-                if ws.connected:
-                    ws.send(messageManager.create_message(3, "humidity", moy))
-                else:
-                    print("Humidity is not activated")
-            else:
-                break
 
-        if isActivate is False:
+                if basicHumidity is None and moy < 55:
+                    basicHumidity = moy
+                    print("Basic humidity: " + str(basicHumidity))
+
+                if ws.connected and lightCount < 10 and moy > basicHumidity + 5:
+                    ws.send(messageManager.create_message(3, "humidity", moy))
+                    lightCount += 1
+                else:
+                    if ws.connected and lightCount >= 10:
+                        print("Humidity stopped")
+                        isTempDone = True
+            else:
+                if isTempDone is True:
+                    pass
+                else:
+                    break
+
+        if isActivate is False and lightCount == 0:
             mess = ws.recv()
             if mess:
                 message = messageManager.get_message(mess)
@@ -42,9 +56,9 @@ while True:
                     isActivate = True
                     print("Humidity activation")
 
-        time.sleep(2.0)
+        time.sleep(1)
 
-    except RuntimeError as error:
+    except RuntimeError as e:
         pass
     except Exception as e:
         pass

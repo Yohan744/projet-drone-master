@@ -9,7 +9,6 @@ messageManager = MessageManager()
 
 currentLightIndex = 0
 lightTab = [
-    [0.15, 0.15],
     [0.1911, 0.1754],
     [0.2323, 0.2008],
     [0.2734, 0.2262],
@@ -18,9 +17,7 @@ lightTab = [
     [0.3968, 0.3025],
     [0.4380, 0.3279],
     [0.4791, 0.3533],
-    [0.5203, 0.3787],
-    [0.5614, 0.4041],
-    [0.5614, 0.4041]
+    [0.5203, 0.3987],
 ]
 
 ws = create_connection("ws://localhost:8080")
@@ -39,12 +36,10 @@ headers = {
 
 
 def setupBasicScene():
-
     sceneData = {
         "scene": os.getenv('SCENE_ID')
     }
-
-    # response = requests.put(url, json=sceneData, headers=headers)
+    response = requests.put(url, json=sceneData, headers=headers)
 
 
 def control_lights(xy, transitiontime):
@@ -56,11 +51,11 @@ def control_lights(xy, transitiontime):
         "transitiontime": transitiontime
     }
 
-    # response = requests.put(url, json=data, headers=headers)
-    print("switch light")
+    response = requests.put(url, json=data, headers=headers)
 
 
-setupBasicScene()
+# setupBasicScene()
+control_lights([0.5203, 0.3987], 10)
 
 try:
     while True:
@@ -73,9 +68,9 @@ try:
                     control_lights([0.15, 0.15], 50)
 
                 if message["action"] == "update":
-                    if currentLightIndex < len(lightTab):
+                    if currentLightIndex < len(lightTab) and lightTab[currentLightIndex] is not None:
+                        control_lights(lightTab[currentLightIndex], 15)
                         currentLightIndex += 1
-                        control_lights(lightTab[currentLightIndex], 10)
 
         except KeyboardInterrupt:
             break
