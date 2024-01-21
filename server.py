@@ -43,7 +43,8 @@ class Server:
 
         if message["step_id"] == 1:
             if message["action"] == "joystick_button":
-                self.send_message_to("spray", self.messageManager.create_message(1, "activateSpray", ""))
+                self.send_message_to("spray", self.messageManager.create_message(1, "activateSpray", message["message"]))
+                self.send_message_to("web", self.messageManager.create_message(1, "cancelLoop", message["message"]))
             else:
                 self.send_message_to("ipad", self.messageManager.create_message(1, message["action"], message["message"]))
 
@@ -51,8 +52,8 @@ class Server:
 
             if message["action"] == "startRotator":
                 self.send_message_to("rotator", self.messageManager.create_message(3, "launchRotator", ""))
-            if message["action"] == "rotator":
-                self.send_message_to("rover", self.messageManager.create_message(3, "rotator", message["message"]))
+            if message["action"] == "stopRotator":
+                self.send_message_to("rotator", self.messageManager.create_message(3, "stopRotator", ""))
 
             if message["action"] == "startHumidity":
                 self.send_message_to("temperature", self.messageManager.create_message(3, "launchHumidity", ""))
@@ -61,6 +62,9 @@ class Server:
                 if message["message"] is not None and self.updatedLightsCount < 10:
                     self.updatedLightsCount += 1
                     self.send_message_to("lights", self.messageManager.create_message(3, "update", ""))
+
+            if message["action"] == "fakePumping":
+                self.send_message_to("buttons", self.messageManager.create_message(3, "fakePumping", ""))
 
         if message["step_id"] == 4:
             if message["action"] == "microphone":

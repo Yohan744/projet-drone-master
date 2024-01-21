@@ -8,16 +8,25 @@ class TelloController:
         self.tello = Tello()
         self.tello.connect()
         self.is_flying = False
+        self.has_flipped_back = False
 
     def start(self):
         battery_level = self.tello.get_battery()
         if battery_level < 20:
             print(f"Battery too low for takeoff: {battery_level}%")
         else:
-            print("Taking off")
-            self.tello.takeoff()
             self.is_flying = True
-            self.tello.flip_back()
+            self.tello.send_command_without_return("takeoff")
+            time.sleep(4)
+            self.tello.send_command_without_return("cw 30")
+            time.sleep(3)
+            self.tello.send_command_without_return("ccw 60")
+            time.sleep(3)
+            self.tello.send_command_without_return("cw 30")
+
+    def goBack(self):
+        self.tello.send_command_without_return("flip b")
+        self.has_flipped_back = True
 
     def stop(self):
         print("Landing")
@@ -37,11 +46,14 @@ class TelloController:
         connection_counter = 0
         try:
             while True:
-                if keyboard.is_pressed('p') and not self.is_flying:
+                if keyboard.is_pressed('d') and not self.is_flying:
                     self.start()
                 elif keyboard.is_pressed('space'):
                     self.emergency()
                     break
+
+                if keyboard.is_pressed("p") and self.is_flying and not self.has_flipped_back:
+                    self.goBack()
 
                 if connection_counter >= 50:
                     self.keep_connection_active()

@@ -32,23 +32,27 @@ GPIO.setup(CLK, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(DT, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 clkLastState = GPIO.input(CLK)
 counter = 19
+number_of_turn = 0
+max_turn = 15
 
 try:
     while True:
         clkState = GPIO.input(CLK)
         dtState = GPIO.input(DT)
         if clkState != clkLastState:
-            if clkState == dtState:
+            if clkState == dtState and isActivate:
                 counter += 1
-                if counter >= 20 and isActivate is True:
+                if counter >= 20:
+                    if number_of_turn < max_turn:
+                        if ws is not None and ws.connected:
+                            ws.send(messageManager.create_message(3, "rotator", "turning"))
+                        if ws_rover is not None and ws_rover.connected:
+                            ws_rover.send(messageManager.create_message(3, "rotator", "turning"))
+                        number_of_turn += 1
+                        counter = 0
+                    else:
+                        print("max turn reached")
 
-                    if ws is not None and ws.connected:
-                        ws.send(messageManager.create_message(3, "rotator", "turning"))
-
-                    if ws_rover is not None and ws_rover.connected:
-                        ws_rover.send(messageManager.create_message(3, "rotator", "turning"))
-
-                    counter = 0
             clkLastState = clkState
 
         if isActivate is False:

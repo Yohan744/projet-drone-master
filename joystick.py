@@ -95,7 +95,7 @@ try:
         x_zero_sent = handle_deadzone(x_value, "X", x_zero_sent)
         y_zero_sent = handle_deadzone(y_value, "Y", y_zero_sent, invert=True)
 
-        time.sleep(0.2)
+        time.sleep(0.25)
 
 except KeyboardInterrupt:
     spi.close()

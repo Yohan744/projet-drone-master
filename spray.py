@@ -21,14 +21,18 @@ GPIO.setup(sprayPin, GPIO.OUT)
 GPIO.output(sprayPin, GPIO.HIGH)
 
 
-def activateSpray():
-    GPIO.output(sprayPin, GPIO.LOW)
-    time.sleep(0.5)
-    GPIO.output(sprayPin, GPIO.HIGH)
-    time.sleep(4)
-    GPIO.output(sprayPin, GPIO.LOW)
-    time.sleep(0.5)
-    GPIO.output(sprayPin, GPIO.HIGH)
+def activateSpray(force=False):
+    global alreadySprayed
+    if force is True or alreadySprayed is False:
+        GPIO.output(sprayPin, GPIO.LOW)
+        time.sleep(0.5)
+        GPIO.output(sprayPin, GPIO.HIGH)
+        time.sleep(4)
+        GPIO.output(sprayPin, GPIO.LOW)
+        time.sleep(0.5)
+        GPIO.output(sprayPin, GPIO.HIGH)
+        if force is False:
+            alreadySprayed = True
 
 
 try:
@@ -36,9 +40,12 @@ try:
         try:
             mess = ws.recv()
             message = messageManager.get_message(mess)
-            if message["action"] == "activateSpray" and not alreadySprayed:
+            if message["action"] == "activateSpray":
+                if message["message"] == "force":
+                    activateSpray(True)
+                else:
+                    activateSpray()
                 print("Spray activation")
-                activateSpray()
 
         except KeyboardInterrupt:
             break
