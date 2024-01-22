@@ -46,7 +46,7 @@ class TelloController:
         connection_counter = 0
         try:
             while True:
-                if keyboard.is_pressed('d') and not self.is_flying:
+                if keyboard.is_pressed('d') or keyboard.is_pressed("D") and not self.is_flying:
                     self.start()
                 elif keyboard.is_pressed('space'):
                     self.emergency()

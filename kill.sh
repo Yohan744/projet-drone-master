@@ -1,4 +1,5 @@
 sudo pkill -f server.py
+sudo pkill -f ping.py
 sudo pkill -f buttons.py
 sudo pkill -f rotator.py
 sudo pkill -f joystick.py

@@ -14,6 +14,7 @@ class Server:
         self.messageManager = MessageManager()
         self.clients = {}
         self.updatedLightsCount = 0
+        self.isJoystickActive = False
 
     def new_client(self, client, server):
         self.clients[client['id']] = {"address": client['address'], "handler": client["handler"], "name": None}
@@ -43,10 +44,11 @@ class Server:
 
         if message["step_id"] == 1:
             if message["action"] == "joystick_button":
+                self.isJoystickActive = True
                 self.send_message_to("spray", self.messageManager.create_message(1, "activateSpray", message["message"]))
-                self.send_message_to("web", self.messageManager.create_message(1, "cancelLoop", message["message"]))
             else:
-                self.send_message_to("ipad", self.messageManager.create_message(1, message["action"], message["message"]))
+                if self.isJoystickActive:
+                    self.send_message_to("ipad", self.messageManager.create_message(1, message["action"], message["message"]))
 
         if message["step_id"] == 3:
 
@@ -72,6 +74,9 @@ class Server:
 
             if message["action"] == "remote":
                 self.send_message_to("web", self.messageManager.create_message(4, "remote", message["message"]))
+
+            if message["action"] == "cancelLoop":
+                self.send_message_to("web", self.messageManager.create_message(4, "cancelLoop", message["message"]))
 
     def send_message_to(self, client_name, message):
         for client_id, client_info in self.clients.items():

@@ -11,6 +11,8 @@ pin_manager = PinManager()
 isActivate = False
 lightCount = 0
 basicHumidity = None
+basicStartMoy = 0
+numberOfBasicHumidity = 0
 isTempDone = False
 
 ws = create_connection("ws://localhost:8080")
@@ -30,10 +32,16 @@ while True:
             if h_left is not None and h_right is not None and isinstance(h_left, int) and isinstance(h_right,int) and isTempDone is False:
 
                 moy = (h_left + h_right) / 2
+                print(moy)
 
-                if basicHumidity is None and moy < 55:
-                    basicHumidity = moy
-                    print("Basic humidity: " + str(basicHumidity))
+                if numberOfBasicHumidity < 3:
+                    basicStartMoy += moy
+                    numberOfBasicHumidity += 1
+                    print(numberOfBasicHumidity)
+                else:
+                    if basicHumidity is None:
+                        basicHumidity = basicStartMoy / numberOfBasicHumidity
+                        print("Basic humidity: " + str(basicHumidity))
 
                 if ws.connected and lightCount < 10 and moy > basicHumidity + 5:
                     ws.send(messageManager.create_message(3, "humidity", moy))
@@ -56,7 +64,7 @@ while True:
                     isActivate = True
                     print("Humidity activation")
 
-        time.sleep(1)
+        time.sleep(1.5)
 
     except RuntimeError as e:
         pass

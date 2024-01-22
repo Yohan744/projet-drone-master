@@ -37,9 +37,9 @@ def callback_micro(channel):
 
 def callback_heart(channel):
     state = GPIO.input(channel)
-    if ws.connected:
+    if ws and ws.connected:
         ws.send(messageManager.create_message(3, "pumping", "on"))
-    if ws_rover.connected:
+    if ws_rover and ws_rover.connected:
         ws_rover.send(messageManager.create_message(3, "pumping", "on"))
 
 
