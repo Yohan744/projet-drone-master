@@ -3,13 +3,12 @@ import RPi.GPIO as GPIO
 import time
 from messageManager import MessageManager
 from pinManager import PinManager
+import threading
 
 messageManager = MessageManager()
 pin_manager = PinManager()
 
 isActivate = False
-
-global ws, ws_rover
 
 ws = create_connection("ws://localhost:8080")
 if ws.connected:
@@ -21,9 +20,9 @@ try:
     if ws_rover.connected:
         ws_rover.send(messageManager.create_message(0, "setName", "rotator"))
 except WebSocketException as e:
-    pass
+    print(f"WebSocketException: {e}")
 except Exception as e:
-    pass
+    print(f"Exception: {e}")
 
 CLK = pin_manager.get_pin("rotator_clk")
 DT = pin_manager.get_pin("rotator_dt")
@@ -31,39 +30,57 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setup(CLK, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(DT, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 clkLastState = GPIO.input(CLK)
-counter = 19
-number_of_turn = 0
-max_turn = 15
+counter = 59
+
+
+def websocket_listener():
+    global isActivate
+    while True:
+        try:
+            mess = ws.recv()
+            if mess:
+                message = messageManager.get_message(mess)
+                if message["action"] == "rotator":
+                    if message["message"] == "activate":
+                        isActivate = True
+                        print("Activated rotator")
+                    elif message["message"] == "stop":
+                        isActivate = False
+                        if ws_rover is not None and ws_rover.connected:
+                            ws_rover.send(messageManager.create_message(3, "rotator", "stop"))
+                        print("Stopped rotator")
+                    elif message["message"] == "reset":
+                        if ws_rover is not None and ws_rover.connected:
+                            ws_rover.send(messageManager.create_message(3, "rotator", "reset"))
+                        print("Reset rover")
+                    elif message["message"] == "force":
+                        if ws_rover is not None and ws_rover.connected:
+                            ws_rover.send(messageManager.create_message(3, "rotator", "turning"))
+                        print("Forced turn")
+        except WebSocketException:
+            pass
+        except Exception as e:
+            print(f"Error: {e}")
+
+
+threading.Thread(target=websocket_listener, daemon=True).start()
 
 try:
     while True:
         clkState = GPIO.input(CLK)
         dtState = GPIO.input(DT)
-        if clkState != clkLastState:
-            if clkState == dtState and isActivate:
+        if clkState != clkLastState and isActivate:
+            if clkState == dtState:
                 counter += 1
-                if counter >= 20:
-                    if number_of_turn < max_turn:
-                        if ws is not None and ws.connected:
-                            ws.send(messageManager.create_message(3, "rotator", "turning"))
-                        if ws_rover is not None and ws_rover.connected:
-                            ws_rover.send(messageManager.create_message(3, "rotator", "turning"))
-                        number_of_turn += 1
-                        counter = 0
-                    else:
-                        print("max turn reached")
-
+                if counter >= 60:
+                    if ws_rover is not None and ws_rover.connected:
+                        ws_rover.send(messageManager.create_message(3, "rotator", "turning"))
+                        print("Message was sent to max")
+                    print("Rotator turning")
+                    counter = 0
             clkLastState = clkState
 
-        if isActivate is False:
-            mess = ws.recv()
-            if mess and mess is not None:
-                message = messageManager.get_message(mess)
-                if message["action"] == "launchRotator":
-                    isActivate = True
-                    print("Rotator activation")
-
-        time.sleep(0.005)
+        time.sleep(0.0025)
 
 except KeyboardInterrupt:
     GPIO.cleanup()

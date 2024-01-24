@@ -22,6 +22,33 @@ if ws.connected:
 dht_left = adafruit_dht.DHT11(board.D17)
 dht_right = adafruit_dht.DHT11(board.D27)
 
+
+def calculateBaseHumidity(repeat=10, interval=2):
+    humidity = 0
+    count = 0
+
+    while count < repeat:
+        try:
+            h_left = dht_left.humidity
+            h_right = dht_right.humidity
+
+            if h_left is not None and h_right is not None:
+                moy = (h_left + h_right) / 2
+                humidity += moy
+                count += 1
+
+            time.sleep(interval)
+
+        except RuntimeError as e:
+            time.sleep(interval)
+
+    print("Basic humidity: ", humidity / repeat)
+    return humidity / repeat
+
+
+basicHumidity = calculateBaseHumidity(5, 2)
+
+
 while True:
     try:
 
@@ -34,22 +61,15 @@ while True:
                 moy = (h_left + h_right) / 2
                 print(moy)
 
-                if numberOfBasicHumidity < 3:
-                    basicStartMoy += moy
-                    numberOfBasicHumidity += 1
-                    print(numberOfBasicHumidity)
-                else:
-                    if basicHumidity is None:
-                        basicHumidity = basicStartMoy / numberOfBasicHumidity
-                        print("Basic humidity: " + str(basicHumidity))
+                if basicHumidity is not None:
+                    if ws.connected and lightCount < 10 and moy > basicHumidity + 5:
+                        ws.send(messageManager.create_message(3, "humidity", moy))
+                        lightCount += 1
+                    else:
+                        if ws.connected and lightCount >= 10:
+                            print("Humidity stopped")
+                            isTempDone = True
 
-                if ws.connected and lightCount < 10 and moy > basicHumidity + 5:
-                    ws.send(messageManager.create_message(3, "humidity", moy))
-                    lightCount += 1
-                else:
-                    if ws.connected and lightCount >= 10:
-                        print("Humidity stopped")
-                        isTempDone = True
             else:
                 if isTempDone is True:
                     pass

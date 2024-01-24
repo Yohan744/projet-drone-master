@@ -43,7 +43,7 @@ class Server:
     def handleMessage(self, message):
 
         if message["step_id"] == 1:
-            if message["action"] == "joystick_button":
+            if message["action"] == "spray":
                 self.isJoystickActive = True
                 self.send_message_to("spray", self.messageManager.create_message(1, "activateSpray", message["message"]))
             else:
@@ -52,10 +52,8 @@ class Server:
 
         if message["step_id"] == 3:
 
-            if message["action"] == "startRotator":
-                self.send_message_to("rotator", self.messageManager.create_message(3, "launchRotator", ""))
-            if message["action"] == "stopRotator":
-                self.send_message_to("rotator", self.messageManager.create_message(3, "stopRotator", ""))
+            if message["action"] == "rotator":
+                self.send_message_to("rotator", self.messageManager.create_message(3, message["action"], message["message"]))
 
             if message["action"] == "startHumidity":
                 self.send_message_to("temperature", self.messageManager.create_message(3, "launchHumidity", ""))

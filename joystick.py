@@ -28,7 +28,7 @@ def button_callback(channel):
     state = GPIO.input(channel)
     if state and smell == False:
         if ws.connected:
-            ws.send(messageManager.create_message(1, "joystick_button", "smell"))
+            ws.send(messageManager.create_message(1, "spray", ""))
         smell = True
 
 
