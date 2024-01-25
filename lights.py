@@ -72,6 +72,9 @@ try:
                         control_lights(lightTab[currentLightIndex], 15)
                         currentLightIndex += 1
 
+                if message["action"] == "fake":
+                    control_lights([0.5203, 0.3987], 100)
+
         except KeyboardInterrupt:
             break
         except WebSocketException as e:

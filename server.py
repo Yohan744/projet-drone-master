@@ -63,6 +63,12 @@ class Server:
                     self.updatedLightsCount += 1
                     self.send_message_to("lights", self.messageManager.create_message(3, "update", ""))
 
+            if message["action"] == "fakeLights":
+                self.send_message_to("lights", self.messageManager.create_message(3, "fake", ""))
+
+            if message["action"] == "startPumping":
+                self.send_message_to("buttons", self.messageManager.create_message(3, "startPumping", ""))
+
             if message["action"] == "fakePumping":
                 self.send_message_to("buttons", self.messageManager.create_message(3, "fakePumping", ""))
 

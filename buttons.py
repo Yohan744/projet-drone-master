@@ -27,6 +27,7 @@ except Exception as e:
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(pin_manager.get_pin("microphone"), GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(pin_manager.get_pin("heart"), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+isPumpingActive = False
 
 
 def callback_micro(channel):
@@ -37,9 +38,9 @@ def callback_micro(channel):
 
 def callback_heart(channel):
     state = GPIO.input(channel)
-    if ws and ws.connected:
+    if ws and ws.connected and isPumpingActive:
         ws.send(messageManager.create_message(3, "pumping", "on"))
-    if ws_rover and ws_rover.connected:
+    if ws_rover and ws_rover.connected and isPumpingActive:
         ws_rover.send(messageManager.create_message(3, "pumping", "on"))
 
 
@@ -58,6 +59,8 @@ try:
                     ws_rover.send(messageManager.create_message(3, "pumping", "on"))
                 else:
                     print("no rover connected")
+            if message["action"] == "startPumping":
+                isPumpingActive = True
 
         time.sleep(0.1)
 except KeyboardInterrupt:

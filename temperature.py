@@ -62,7 +62,7 @@ while True:
                 print(moy)
 
                 if basicHumidity is not None:
-                    if ws.connected and lightCount < 10 and moy > basicHumidity + 5:
+                    if ws.connected and lightCount < 10 and moy > basicHumidity + 3:
                         ws.send(messageManager.create_message(3, "humidity", moy))
                         lightCount += 1
                     else:
